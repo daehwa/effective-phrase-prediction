@@ -1,13 +1,11 @@
 import copy
 
 wFile = open('./phrase_data.txt','w')
-rFile = open('./corpus.txt','r')
+rFile = open('./restaurant_reviews.txt','r') 
 
-N = 4 # n-gram
-tau = 3
-##########
-# prune all phrases below the threshold parameter(tau) and store the rest
-############
+N = 8 # n-gram
+tau = 2
+
 def frequency(tree):
 	if tree:
 		for node in tree.children:
@@ -15,9 +13,7 @@ def frequency(tree):
 		for node in tree.children:
 			frequency(node)
 
-##########
-# extract significant phrases with frequency number to .txt file
-############
+
 def phrase_list(tree):
 	if tree:
 		if not tree.children:
@@ -31,9 +27,6 @@ def phrase_list(tree):
 			for node in tree.children:
 				phrase_list(node)
 
-##########
-# A Node for fussytree
-############
 class Node(object):
 	def __init__(self,data):
 		self.data = data
@@ -47,12 +40,8 @@ class Node(object):
 	def contain_child(self,d):
 		return [i for i, s in enumerate(self.children) if s.data==d]
 
-# root node
 fussytree = Node("root")
 
-##########
-# Extend fussytree
-############
 while True:
 	data = rFile.readline()
 	if not data:
@@ -62,17 +51,17 @@ while True:
 		flag = False
 		tree = fussytree
 		leng = min(n+N,len(sentence))
-		N_gram = sentence[n:leng]	# should cut down a sentence to n_gram
+		N_gram = sentence[n:leng]
 		for i in range(len(N_gram)):
 			if (flag):
 				tree.add_child(Node(N_gram[i]),tree)
 				tree = tree.children[0]
-			elif not tree.contain_child(N_gram[i]): # there is no the word
+			elif not tree.contain_child(N_gram[i]):
 				tree.add_child(Node(N_gram[i]),tree)
 				index = len(tree.children)-1
 				tree = tree.children[index]
 				flag = True
-			else:	# there exits the word
+			else:	
 				index = tree.contain_child(N_gram[i])
 				tree = tree.children[index[0]]
 				tree.count += 1
